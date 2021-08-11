@@ -1,6 +1,6 @@
 #  @PRERAK  instructions     -> instructions for which binary to be generated
 #  @PRERAK  var_instructions -> variable declarations only
-#  @PRERAK  address          -> 
+#  @PRERAK  address          -> tells us the instruction's address
 #  @PRERAK  opcode           -> dictionary ..stores opcode for each key (say 'mul')
 #  @PRERAK  register_code    -> dictionary..stores code for each register as key
 ###############################################################################################
