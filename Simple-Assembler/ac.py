@@ -1,33 +1,70 @@
-# @p instructions     -> instructions for which binary to be generated
-# @p var_instructions -> variable declarations only
-# @p address          -> 
-# opcode              -> 
-##############################################################################################
+#  @PRERAK  instructions     -> instructions for which binary to be generated
+#  @PRERAK  var_instructions -> variable declarations only
+#  @PRERAK  address          -> 
+#  @PRERAK  opcode           -> dictionary ..stores opcode for each key (say 'mul')
+#  @PRERAK  register_code    -> dictionary..stores code for each register as key
+###############################################################################################
 import sys
 l=list(sys.stdin.read().split('\n'))
 
 var_instructions=[]
 instructions=[]
+labels={}
+count=0; var_count=0;
 
 for i in range(len(l)):
 	if(l[i]==''):
 		continue
-	if(l[i][0:3]!="var"):
-		instructions.append(l[i])
-		instructions[-1]=instructions[-1].split(' ')
-	else:
-		var_instructions.append(l[i])
-		var_instructions[-1]=var_instructions[-1].split(' ')
 
-# @p													(TARGET INSTRUCTION)
-# @p instruc address i -> if i<len(instructions) => instructions[address[i]]
-# @p				   ->     >                  => var_instructions[address[i]]
+	temp = l[i].split(' ') #  @PRERAK  temp=['label2:' , 'mov' , 'R1' , '$5']
+	if(temp[0][-1]==':'):
+		label_str = temp[0][:-1]
+		if(temp[1]=='var'):
+			labels[label_str]=[var_count,-1]  #  @PRERAK  -1 is dummmy to identify var labels
+			var_count += 1
+		else:
+			labels[label_str]=count
+			count += 1
+		temp = temp[1:] #  @PRERAK  temp=['mov' , 'R1' , '$5'], if more than one lable ERROR
+		buff=""
+		for x in temp[0:-1]:
+		    buff=buff+x+" "
+		buff+=temp[-1]      #  @PRERAK  now its as if label was never there
+		if(buff[0:3]!="var"):
+			instructions.append(buff)
+			instructions[-1]=instructions[-1].split(' ')
+		else:
+			var_instructions.append(buff)
+			var_instructions[-1]=var_instructions[-1].split(' ')
+
+
+	else:
+		if(l[i][0:3]!="var"):
+			count += 1
+			instructions.append(l[i])
+			instructions[-1]=instructions[-1].split(' ')
+		else:
+			var_count += 1
+			var_instructions.append(l[i])
+			var_instructions[-1]=var_instructions[-1].split(' ')
+
+
+for x in labels.keys():
+	if(type(labels[x])==type([])):
+		labels[x]=len(instructions)+labels[x][0]
+
+
+# @PRERAK													(TARGET INSTRUCTION)
+# @PRERAK instruc address i -> if i<len(instructions) => instructions[address[i]]
+# @PRERAK				   ->     >                  => var_instructions[address[i]]
 address = list(range(0,len(instructions))) + list(range(0,len(var_instructions)))
 
+
+#  @PRERAK 
 ##############################################################################################
+#print("instructions     -> ",instructions);print();print("var_instructions -> ",var_instructions);print();print("address          -> ",address);print();print("labels           -> ",labels);
 ##############################################################################################
 
-memory = {}
 
 opcode = { "add":"00000","sub":"00001","mul":"00110","xor":"01010","or":"01011","and":"01100",
 		   "movB":"00010","rs":"01000","ls":"01001",
@@ -44,11 +81,11 @@ R4 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 R5 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 R6 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
-#							      V  L  G  E
+#	@PRERAK						  V  L  G  E
 FLAGS = [0,0,0,0,0,0,0,0,0,0,0,0, 0, 0, 0, 0]
 
 
-def binary(current_instruction,current_instruction_type): # return binary eq. as string
+def binary(current_instruction,current_instruction_type): #  @PRERAK  return binary eq. as string
 	if(current_instruction[0]=='mov'):
 		if(current_instruction_type=='B'):
 			s = opcode["movB"]
@@ -77,34 +114,46 @@ def binary(current_instruction,current_instruction_type): # return binary eq. as
 
 	elif(current_instruction_type=='C'):
 		s+="00000"
-		if(current_instruction[0]=='mov'):
-			s+=register_code["movC"]
-		else:
-			s+=register_code[current_instruction[1]]
-
-		if(current_instruction[0]=='mov'):
-			s+=register_code["movC"]
-		else:
-			s+=register_code[current_instruction[2]]
+		s+=register_code[current_instruction[1]]
+		s+=register_code[current_instruction[2]]
 
 	
 	elif(current_instruction_type=='D'):
 		s+=register_code[current_instruction[1]]
-		####
+		for i in range(len(var_instructions)):
+			if(var_instructions[i][-1]==current_instruction[2]):
+				addr=len(instructions)+i
+				s1=str(bin(addr))[2:]
+				if(len(s1)<8):
+					for i in range(8-len(s1)):
+						s+="0"
+				s+=s1
+				break
+		
 
-	elif(current_instruction_type=='E'):
+	elif(current_instruction_type=='E'):  #  @PRERAK  JUMP TO LABEL
 		s+="000"
-		####
-
+		goto_label=current_instruction[1]
+		for x in labels.keys():
+			if(x==goto_label):
+				addr=labels[x]
+				s1=str(bin(addr))[2:]
+				if(len(s1)<8):
+					for i in range(8-len(s1)):
+						s+="0"
+				s+=s1
+				break
 	
 
 	elif(current_instruction_type=='F'):
 		s+="00000000000"
 
+
 	return s
 
 
-def instruction_type(current_instruction): 
+def instruction_type(current_instruction):    #  @PRERAK  tell type of passed instrcn.
+
 	if(current_instruction[0]=='add' or current_instruction[0]=='sub' or current_instruction[0]=='mul' or current_instruction[0]=='or' or current_instruction[0]=='xor' or current_instruction[0]=='and'):
 		return 'A'
 	if(current_instruction[0]=='rs' or current_instruction[0]=='ls'):
@@ -117,8 +166,17 @@ def instruction_type(current_instruction):
 		return 'E'
 	if(current_instruction[0]=='hlt'):
 		return 'F'
-	if(current_instruction[0]=='mov'):
+	if(current_instruction[0]=='mov'):       # @PRERAK  we deal with 'mov' separately
 		if(current_instruction[-1][0]=='$'):
 			return 'B'
 		else:
 			return 'C'
+
+
+
+
+for i in range(len(instructions)):  #  @PRERAK  simply iterate on instructions
+	print(binary(instructions[i],instruction_type(instructions[i])))
+
+
+
