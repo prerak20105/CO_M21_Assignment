@@ -65,6 +65,7 @@ address = list(range(0,len(instructions))) + list(range(0,len(var_instructions))
 #print("instructions     -> ",instructions);print();print("var_instructions -> ",var_instructions);print();print("address          -> ",address);print();print("labels           -> ",labels);
 ##############################################################################################
 
+#  @PRERAK  dictionaries for opcode and register's code
 
 opcode = { "add":"00000","sub":"00001","mul":"00110","xor":"01010","or":"01011","and":"01100",
 		   "movB":"00010","rs":"01000","ls":"01001",
