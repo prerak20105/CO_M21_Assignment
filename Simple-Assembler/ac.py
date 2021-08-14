@@ -7,72 +7,83 @@
 import sys
 l=list(sys.stdin.read().split('\n'))
 
+for i in range(len(l)):
+    buff=l[i].split() # @PRERAK  ignore the extra spaces
+    s_="" 
+    for x in buff:
+        s_+=x
+        s_+=" "
+    ss=s_[:-1]   # to ignore extra space
+    l[i]=ss
+
 var_instructions=[]
 instructions=[]
 labels={}
 count=0; var_count=0;
 
 for i in range(len(l)):
-	if(l[i]==''):
-		continue
+    if(l[i]==''):
+        continue
 
-	temp = l[i].split(' ') #  @PRERAK  temp=['label2:' , 'mov' , 'R1' , '$5']
-	if(temp[0][-1]==':'):
-		label_str = temp[0][:-1]
-		if(temp[1]=='var'):
-			labels[label_str]=[var_count,-1]  #  @PRERAK  -1 is dummmy to identify var labels
-			var_count += 1
-		else:
-			labels[label_str]=count
-			count += 1
-		temp = temp[1:] #  @PRERAK  temp=['mov' , 'R1' , '$5'], if more than one lable ERROR
-		buff=""
-		for x in temp[0:-1]:
-		    buff=buff+x+" "
-		buff+=temp[-1]      #  @PRERAK  now its as if label was never there
-		if(buff[0:3]!="var"):
-			instructions.append(buff)
-			instructions[-1]=instructions[-1].split(' ')
-		else:
-			var_instructions.append(buff)
-			var_instructions[-1]=var_instructions[-1].split(' ')
+    temp = l[i].split(' ') #  @PRERAK  temp=['label2:' , 'mov' , 'R1' , '$5']
+    if(temp[0][-1]==':'):
+        label_str = temp[0][:-1]
+        if(len(temp)==1):  # if only label definition is there
+            continue
+        if(temp[1]=='var'):
+            labels[label_str]=[var_count,-1]  #  @PRERAK  -1 is dummmy to identify var labels
+            var_count += 1
+        else:
+            labels[label_str]=count
+            count += 1
+        temp = temp[1:] #  @PRERAK  temp=['mov' , 'R1' , '$5'], if more than one lable ERROR
+        buff=""
+        for x in temp[0:-1]:
+            buff=buff+x+" "
+        buff+=temp[-1]      #  @PRERAK  now its as if label was never there
+        if(buff[0:3]!="var"):
+            instructions.append(buff)
+            instructions[-1]=instructions[-1].split(' ')
+        else:
+            var_instructions.append(buff)
+            var_instructions[-1]=var_instructions[-1].split(' ')
 
 
-	else:
-		if(l[i][0:3]!="var"):
-			count += 1
-			instructions.append(l[i])
-			instructions[-1]=instructions[-1].split(' ')
-		else:
-			var_count += 1
-			var_instructions.append(l[i])
-			var_instructions[-1]=var_instructions[-1].split(' ')
+    else:
+        if(l[i][0:3]!="var"):
+            count += 1
+            instructions.append(l[i])
+            instructions[-1]=instructions[-1].split(' ')
+        else:
+            var_count += 1
+            var_instructions.append(l[i])
+            var_instructions[-1]=var_instructions[-1].split(' ')
 
 
 for x in labels.keys():
-	if(type(labels[x])==type([])):
-		labels[x]=len(instructions)+labels[x][0]
+    if(type(labels[x])==type([])):
+        labels[x]=len(instructions)+labels[x][0]
 
 
-# @PRERAK													(TARGET INSTRUCTION)
+# @PRERAK                                                   (TARGET INSTRUCTION)
 # @PRERAK instruc address i -> if i<len(instructions) => instructions[address[i]]
-# @PRERAK				   ->     >                  => var_instructions[address[i]]
+# @PRERAK                  ->     >                  => var_instructions[address[i]]
 address = list(range(0,len(instructions))) + list(range(0,len(var_instructions)))
 
 
 #  @PRERAK 
 ##############################################################################################
-#print("instructions     -> ",instructions);print();print("var_instructions -> ",var_instructions);print();print("address          -> ",address);print();print("labels           -> ",labels);
+# print("instructions     -> ",instructions);print();print("var_instructions -> ",var_instructions);print();print("address          -> ",address);print();print("labels           -> ",labels);print("l\t\t",l);
 ##############################################################################################
 
 #  @PRERAK  dictionaries for opcode and register's code
 
 opcode = { "add":"00000","sub":"00001","mul":"00110","xor":"01010","or":"01011","and":"01100",
-		   "movB":"00010","rs":"01000","ls":"01001",
-		   "movC":"00011","div":"00111","not":"01101","cmp":"01110",
-		   "ld":"00100","st":"00101",
-		   "jmp":"01111","jlt":"10000","jgt":"10001","je":"10010",
-		   "hlt":"10011"}	
+           "movB":"00010","rs":"01000","ls":"01001",
+           "movC":"00011","div":"00111","not":"01101","cmp":"01110",
+           "ld":"00100","st":"00101",
+           "jmp":"01111","jlt":"10000","jgt":"10001","je":"10010",
+           "hlt":"10011"}   
 register_code = {"R0":"000","R1":"001","R2":"010","R3":"011","R4":"100","R5":"101","R6":"110","FLAGS":"111"}
 R0 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 R1 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -82,102 +93,345 @@ R4 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 R5 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 R6 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
-#	@PRERAK						  V  L  G  E
+#   @PRERAK                       V  L  G  E
 FLAGS = [0,0,0,0,0,0,0,0,0,0,0,0, 0, 0, 0, 0]
 
 
 def binary(current_instruction,current_instruction_type): #  @PRERAK  return binary eq. as string
-	if(current_instruction[0]=='mov'):
-		if(current_instruction_type=='B'):
-			s = opcode["movB"]
-		else:
-			s = opcode["movC"]
-	else:
-		s = opcode[current_instruction[0]]
+    if(current_instruction[0]=='mov'):
+        if(current_instruction_type=='B'):
+            s = opcode["movB"]
+        else:
+            s = opcode["movC"]
+    else:
+        s = opcode[current_instruction[0]]
 
-	if(current_instruction_type=='A'):
-		s+="00"
-		s+=register_code[current_instruction[1]]
-		s+=register_code[current_instruction[2]]
-		s+=register_code[current_instruction[3]]
+    if(current_instruction_type=='A'):
+        s+="00"
+        s+=register_code[current_instruction[1]]
+        s+=register_code[current_instruction[2]]
+        s+=register_code[current_instruction[3]]
 
-	
+    
 
-	elif(current_instruction_type=='B'):
-		s+=register_code[current_instruction[1]]
-		n=int(current_instruction[2][1:])
-		s1=str(bin(n))[2:]
-		if(len(s1)<8):
-			for i in range(8-len(s1)):
-				s+="0"
-		s+=s1
-
-
-	elif(current_instruction_type=='C'):
-		s+="00000"
-		s+=register_code[current_instruction[1]]
-		s+=register_code[current_instruction[2]]
-
-	
-	elif(current_instruction_type=='D'):
-		s+=register_code[current_instruction[1]]
-		for i in range(len(var_instructions)):
-			if(var_instructions[i][-1]==current_instruction[2]):
-				addr=len(instructions)+i
-				s1=str(bin(addr))[2:]
-				if(len(s1)<8):
-					for i in range(8-len(s1)):
-						s+="0"
-				s+=s1
-				break
-		
-
-	elif(current_instruction_type=='E'):  #  @PRERAK  JUMP TO LABEL
-		s+="000"
-		goto_label=current_instruction[1]
-		for x in labels.keys():
-			if(x==goto_label):
-				addr=labels[x]
-				s1=str(bin(addr))[2:]
-				if(len(s1)<8):
-					for i in range(8-len(s1)):
-						s+="0"
-				s+=s1
-				break
-	
-
-	elif(current_instruction_type=='F'):
-		s+="00000000000"
+    elif(current_instruction_type=='B'):
+        s+=register_code[current_instruction[1]]
+        n=int(current_instruction[2][1:])
+        s1=str(bin(n))[2:]
+        if(len(s1)<8):
+            for i in range(8-len(s1)):
+                s+="0"
+        s+=s1
 
 
-	return s
+    elif(current_instruction_type=='C'):
+        s+="00000"
+        s+=register_code[current_instruction[1]]
+        s+=register_code[current_instruction[2]]
+
+    
+    elif(current_instruction_type=='D'):
+        s+=register_code[current_instruction[1]]
+        for i in range(len(var_instructions)):
+            if(var_instructions[i][-1]==current_instruction[2]):
+                addr=len(instructions)+i
+                s1=str(bin(addr))[2:]
+                if(len(s1)<8):
+                    for i in range(8-len(s1)):
+                        s+="0"
+                s+=s1
+                break
+        
+
+    elif(current_instruction_type=='E'):  #  @PRERAK  JUMP TO LABEL
+        s+="000"
+        goto_label=current_instruction[1]
+        for x in labels.keys():
+            if(x==goto_label):
+                addr=labels[x]
+                s1=str(bin(addr))[2:]
+                if(len(s1)<8):
+                    for i in range(8-len(s1)):
+                        s+="0"
+                s+=s1
+                break
+    
+
+    elif(current_instruction_type=='F'):
+        s+="00000000000"
+
+
+    return s
 
 
 def instruction_type(current_instruction):    #  @PRERAK  tell type of passed instrcn.
 
-	if(current_instruction[0]=='add' or current_instruction[0]=='sub' or current_instruction[0]=='mul' or current_instruction[0]=='or' or current_instruction[0]=='xor' or current_instruction[0]=='and'):
-		return 'A'
-	if(current_instruction[0]=='rs' or current_instruction[0]=='ls'):
-		return 'B'
-	if(current_instruction[0]=='div' or current_instruction[0]=='not' or current_instruction[0]=='cmp'):
-		return 'C'
-	if(current_instruction[0]=='st' or current_instruction[0]=='ld'):
-		return 'D'
-	if(current_instruction[0]=='je' or current_instruction[0]=='jgt' or current_instruction[0]=='jlt' or current_instruction[0]=='jmp'):
-		return 'E'
-	if(current_instruction[0]=='hlt'):
-		return 'F'
-	if(current_instruction[0]=='mov'):       # @PRERAK  we deal with 'mov' separately
-		if(current_instruction[-1][0]=='$'):
-			return 'B'
-		else:
-			return 'C'
+    if(current_instruction[0]=='add' or current_instruction[0]=='sub' or current_instruction[0]=='mul' or current_instruction[0]=='or' or current_instruction[0]=='xor' or current_instruction[0]=='and'):
+        return 'A'
+    if(current_instruction[0]=='rs' or current_instruction[0]=='ls'):
+        return 'B'
+    if(current_instruction[0]=='div' or current_instruction[0]=='not' or current_instruction[0]=='cmp'):
+        return 'C'
+    if(current_instruction[0]=='st' or current_instruction[0]=='ld'):
+        return 'D'
+    if(current_instruction[0]=='je' or current_instruction[0]=='jgt' or current_instruction[0]=='jlt' or current_instruction[0]=='jmp'):
+        return 'E'
+    if(current_instruction[0]=='hlt'):
+        return 'F'
+    if(current_instruction[0]=='mov'):       # @PRERAK  we deal with 'mov' separately
+        if(current_instruction[-1][0]=='$'):
+            return 'B'
+        else:
+            return 'C'
 
 
+
+
+################################################################################################################
+###########################    ERRORS   ########################################################################
+################################################################################################################
+
+     #   @ ABHINAV  @ PRERAK   @ VINEET
+
+
+error_line=-9
+state=-8
+
+def hlt_error(instructions):
+    global error_line   
+    if( len(instructions)==0 or instructions[-1]!=['hlt']):
+        error_line=-1
+        return True # no hlt in end
+    count=0
+    for j in range(len(instructions)):
+        if(instructions[j]==['hlt']):
+            count+=1
+            if(j<len(instructions)-1):
+                error_line=len(var_instructions)+j+1
+                return True  # multiple hlt
+    if(count<1):
+        error_line=-3
+        return True  # no hlt at all
+    return False
+def label_error(instructions,var_instructions):
+    global error_line
+    global state
+    for i in range(len(instructions)):   
+        if(instructions[i][0][-1]==':'):
+            error_line=len(var_instructions)+i+1
+            state=1
+            return True   # double label
+        if(instruction_type(instructions[i])=='E'):
+            if(instructions[i][-1] not in labels.keys()):
+                error_line=len(var_instructions)+i+1
+                state=2
+                return True # undefined label
+    for i in range(len(var_instructions)):
+        if(var_instructions[i][0][-1]==':'):
+            error_line=len(var_instructions)+1
+            state=3 
+            return True # double label
+    return False                    
+
+
+# /////#
+def var_error(l):
+    global error_line
+    global state
+    count=0          # stores total vars before first normal instrcn.
+    break_index = -1
+
+    for i in range(len(l)):  # if not all var-instrn. at top
+        state=1
+        if(l[i]==''):
+            continue
+        temp=l[i].split(' ')   # ['var', 'x']
+        # print("temp -> ",temp) # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        if(temp[0][-1]==':'):   # label: var x
+            if(temp[1][0]!='v'):
+                break_index=i+1  # in case we'll start from this index to scan for var declarations
+                break               
+            count+=1
+        else:     # var x
+            if(temp[0][0]!='v'):
+                break_index=i+1
+                break
+            count+=1
+
+        count_=1    # storing normal instrcn. encountered till now
+        if(count!=len(var_instructions)):
+            # print("->  ", break_index) # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            # print("->-> ",len(var_instructions)) # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            for j in range(break_index,len(l)):
+                # print("hi")    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                if(l[j]==''):
+                    continue
+                ###
+                temp=l[j].split(' ')
+                if(temp[0][-1]==':'):   # label: var x
+                    if(temp[1][0]=='v'):
+                        count+=1
+                        error_line=count+count_+1  # in case we'll start from this index to scan for var declarations
+                        break
+                    count_+=1
+                else:     # var x
+                    if(temp[0][0]=='v'):
+                        count+=1
+                        error_line=count+count_+1
+                        break
+                    count_+=1
+                ###
+
+            return True
+
+
+
+
+
+
+
+
+
+
+    for i in range(len(instructions)):  # for undefined vars
+        state=2
+        if(instruction_type(instructions[i])=='D' or instruction_type(instructions[i])=='E' ):
+            buff=[]
+            for x in var_instructions:  # storing names of defined vars
+                buff.append(x[1])
+
+            if(instructions[i][-1] not in buff):
+                return True
+
+    return False
+
+def illegal_imm_error(instructions):
+    global error_line
+    for i in range(len(instructions)):
+        if(instruction_type(instructions[i])=='B' ):
+            num = int(instructions[i][-1][1:])
+            if(num<0 or num>255):
+                error_line=len(var_instructions)+i+1
+                return True
+    return False
+def illegal_flags_error(instructions):
+    global error_line
+    for i in range(len(instructions)):
+        if(instructions[i][-1]=='FLAGS'):
+            if(instructions[i][0]!='mov'):
+                error_line=len(var_instructions)+i+1
+                return True
+    return False
+def typo_error(instructions):
+    global state
+    global error_line
+    for i in range(len(instructions)): 
+        if( len(instructions[i])==1 and instructions[i]!=['hlt']):
+            state=0   # fkg;typ
+            error_line=len(var_instructions)+i+1
+            return True
+        if( (instructions[i][0] not in opcode.keys()) and (instructions[i][0]!='mov') ):
+            state=1 # opcode typo
+            error_line=len(var_instructions)+i+1
+            return True
+        typ = instruction_type(instructions[i])
+        if(typ=='A' or typ=='B' or  typ=='C' or  typ=='D'):
+            if(instructions[i][1] not in register_code.keys()):
+                state=2  # first register's typo
+                error_line=len(var_instructions)+i+1
+                return True
+        if(typ=='A'):
+            if((instructions[i][2] not in register_code.keys()) or (instructions[i][3] not in register_code.keys())):
+                state=2 # second or third reg's typo
+                error_line=len(var_instructions)+i+1
+                return True
+        if(typ=='C'):
+            if(instructions[i][2] not in register_code.keys()):
+                state=2 # second reg's typo
+                error_line=len(var_instructions)+i+1
+                return True
+def length_error(instructions):
+    global error_line
+    for i in range(len(instructions)):
+        typ=instruction_type(instructions[i])
+        num=len(instructions[i])
+        if(typ=='A' and num!=4):
+            error_line=len(var_instructions)+i+1
+            return True
+            
+        elif((typ=='B' or typ=='C' or typ=='D') and num!=3):
+            error_line=len(var_instructions)+i+1
+            return True
+
+        elif(typ=='E' and num!=2):
+            error_line=len(var_instructions)+i+1
+            return True
+
+        elif(typ=='F'):
+            error_line=len(var_instructions)+i+1
+            return True
+        return False
+
+
+
+
+def error(instructions):
+    if(label_error(instructions,var_instructions)):
+        if(state==1 or state==3):
+            sys.stderr.write("Label ERROR : Syntax Error at line  ")
+            sys.stdout.write(str(error_line))
+        elif(state==2):
+            sys.stderr.write("Label ERROR : Undefined label at line  ")
+            sys.stdout.write(str(error_line))
+        return True
+    if(hlt_error(instructions)):
+        if(error_line==-1):
+            sys.stderr.write("hlt ERROR : no 'hlt' statement in the end")
+        elif error_line==-3:
+            sys.stderr.write("hlt ERROR : no 'hlt' statement found !")
+        else:
+            sys.stderr.write("hlt ERROR : invalid 'hlt' statement at line  ")
+            sys.stdout.write(str(error_line))
+        return True
+    if(illegal_imm_error(instructions)):
+        sys.stderr.write("Immediate Value ERROR : immediate value out of bounds at line  ")
+        sys.stdout.write(str(error_line))
+        return True
+    if(illegal_flags_error(instructions)):
+        sys.stderr.write("Flag ERROR : Invalid syntax for FLAGS at line  ")
+        sys.stdout.write(str(error_line))
+        return True
+    if(length_error(instructions)):
+        sys.stderr.write("Invalid instruction ERROR : Invalid Syntax at line  ")
+        sys.stdout.write(str(error_line))
+        return True
+    if(typo_error(instructions)):
+        if(state==0):
+            sys.stderr.write("Typo ERROR : Invalid Syntax at line  ")
+            sys.stdout.write(str(error_line))
+        elif(state==1):
+            sys.stderr.write("Typo ERROR : Invalid instruction at line  ")
+            sys.stdout.write(str(error_line))
+        elif(state==2):
+            sys.stderr.write("Typo ERROR : Invalid Register syntax at line  ")
+            sys.stdout.write(str(error_line))
+        return True
+
+    if(var_error(l)):
+        if(state==1):
+            sys.stderr.write("ERROR : Invalid variable declaration at line  ")
+            sys.stdout.write(str(error_line))
+        else:
+            sys.stderr.write("ERROR : Undefined variable at line  ")
+            sys.stdout.write(str(error_line))
+        return True
+
+    
+    
+if(error(instructions)):
+    exit()
+##########################################################################
 
 
 for i in range(len(instructions)):  #  @PRERAK  simply iterate on instructions
-	print(binary(instructions[i],instruction_type(instructions[i])))
-
-
-
+    print(binary(instructions[i],instruction_type(instructions[i])))
