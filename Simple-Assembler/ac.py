@@ -3,7 +3,7 @@
 #  @PRERAK  address          -> tells us the instruction's address
 #  @PRERAK  opcode           -> dictionary ..stores opcode for each key (say 'mul')
 #  @PRERAK  register_code    -> dictionary..stores code for each register as key
-#################################################################################################
+###############################################################################################
 import sys
 l=list(sys.stdin.read().split('\n'))
 
@@ -69,7 +69,6 @@ for x in labels.keys():
 # @PRERAK instruc address i -> if i<len(instructions) => instructions[address[i]]
 # @PRERAK                  ->     >                  => var_instructions[address[i]]
 address = list(range(0,len(instructions))) + list(range(0,len(var_instructions)))
-
 
 #  @PRERAK 
 ##############################################################################################
@@ -191,11 +190,53 @@ def instruction_type(current_instruction):    #  @PRERAK  tell type of passed in
 ###########################    ERRORS   ########################################################################
 ################################################################################################################
 
-     #   @ ABHINAV  @ PRERAK   @ VINEET
 
+# @ABHINAV        @ PRERAK    @ VINEET
 
 error_line=-9
 state=-8
+
+def no_of_statements_till_now_instrn(l,i):
+    count_var=0; count_norm=0;
+    for j in range(len(l)):
+        if(l[j]==''):
+            continue
+
+        temp=l[j].split()
+        if(temp[0][-1]==':'): # label
+            if(len(temp)!=1 and temp[1][0]=='v'):
+                count_var+=1
+            else:
+                count_norm+=1
+        else: # no label
+            if(temp[0][0]=='v'):
+                count_var+=1
+            else:
+                count_norm+=1
+        if(count_norm==i+1):
+            break
+    return count_var+count_norm
+
+
+def no_of_statements_till_now_var(l,i):
+    count_var=0; count_norm=0;
+    for j in range(len(l)):
+        if(l[j]==''):
+            continue
+        temp=l[j].split()
+        if(temp[0][-1]==':'): # label
+            if(temp[1][0]=='v'):
+                count_var+=1
+            else:
+                count_norm+=1
+        else: # no label
+            if(temp[0][0]=='v'):
+                count_var+=1
+            else:
+                count_norm+=1
+        if(count_var==i+1):
+            break
+    return count_var+count_norm
 
 def hlt_error(instructions):
     global error_line   
@@ -216,99 +257,31 @@ def hlt_error(instructions):
 def label_error(instructions,var_instructions):
     global error_line
     global state
+
     for i in range(len(instructions)):   
         if(instructions[i][0][-1]==':'):
-            error_line=len(var_instructions)+i+1
+            error_line=no_of_statements_till_now_instrn(l,i) 
             state=1
             return True   # double label
         if(instruction_type(instructions[i])=='E'):
             if(instructions[i][-1] not in labels.keys()):
-                error_line=len(var_instructions)+i+1
+                error_line=no_of_statements_till_now_instrn(l,i)   
                 state=2
                 return True # undefined label
+
     for i in range(len(var_instructions)):
         if(var_instructions[i][0][-1]==':'):
-            error_line=len(var_instructions)+1
+            error_line=no_of_statements_till_now_var(l,i)  
             state=3 
             return True # double label
-    return False                    
+    return False     
 
 
-# /////#
-def var_error(l):
-    global error_line
-    global state
-    count=0          # stores total vars before first normal instrcn.
-    break_index = -1
-
-    for i in range(len(l)):  # if not all var-instrn. at top
-        state=1
-        if(l[i]==''):
-            continue
-        temp=l[i].split(' ')   # ['var', 'x']
-        # print("temp -> ",temp) # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        if(temp[0][-1]==':'):   # label: var x
-            if(temp[1][0]!='v'):
-                break_index=i+1  # in case we'll start from this index to scan for var declarations
-                break               
-            count+=1
-        else:     # var x
-            if(temp[0][0]!='v'):
-                break_index=i+1
-                break
-            count+=1
-
-        count_=1    # storing normal instrcn. encountered till now
-        if(count!=len(var_instructions)):
-            # print("->  ", break_index) # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            # print("->-> ",len(var_instructions)) # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            for j in range(break_index,len(l)):
-                # print("hi")    # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                if(l[j]==''):
-                    continue
-                ###
-                temp=l[j].split(' ')
-                if(temp[0][-1]==':'):   # label: var x
-                    if(temp[1][0]=='v'):
-                        count+=1
-                        error_line=count+count_+1  # in case we'll start from this index to scan for var declarations
-                        break
-                    count_+=1
-                else:     # var x
-                    if(temp[0][0]=='v'):
-                        count+=1
-                        error_line=count+count_+1
-                        break
-                    count_+=1
-                ###
-
-            return True
-
-
-
-
-
-
-
-
-
-
-    for i in range(len(instructions)):  # for undefined vars
-        state=2
-        if(instruction_type(instructions[i])=='D' or instruction_type(instructions[i])=='E' ):
-            buff=[]
-            for x in var_instructions:  # storing names of defined vars
-                buff.append(x[1])
-
-            if(instructions[i][-1] not in buff):
-                return True
-
-    return False
 
 def illegal_imm_error(instructions):
     global error_line
     for i in range(len(instructions)):
-        if(instruction_type(instructions[i])=='B' ):
+        if(instruction_type(instructions[i])=='B'):
             num = int(instructions[i][-1][1:])
             if(num<0 or num>255):
                 error_line=len(var_instructions)+i+1
@@ -319,7 +292,24 @@ def illegal_flags_error(instructions):
     for i in range(len(instructions)):
         if(instructions[i][-1]=='FLAGS'):
             if(instructions[i][0]!='mov'):
-                error_line=len(var_instructions)+i+1
+                error_line=no_of_statements_till_now_instrn(l,i)  
+                return True
+        typ=instruction_type(instructions[i])
+        if(typ=='A'):
+            if(instructions[i][1]=='FLAGS' or instructions[i][2]=='FLAGS'):
+                error_line=no_of_statements_till_now_instrn(l,i)   
+                return True
+        elif(typ=='B'):
+            if(instructions[i][1]=='FLAGS'):
+                error_line=no_of_statements_till_now_instrn(l,i)   
+                return True
+        elif(typ=='C'):
+            if(instructions[i][1]=='FLAGS'):
+                error_line=no_of_statements_till_now_instrn(l,i)  
+                return True
+        else:
+            if(typ=='D' and instructions[i][1]=='FLAGS'):  
+                error_line=no_of_statements_till_now_instrn(l,i)  
                 return True
     return False
 def typo_error(instructions):
@@ -350,8 +340,14 @@ def typo_error(instructions):
                 state=2 # second reg's typo
                 error_line=len(var_instructions)+i+1
                 return True
-def length_error(instructions):
+def length_error(instructions): # var_instrucions
     global error_line
+
+    for j in range(len(var_instructions)):
+        if(len(var_instructions[j])!=2):
+            error_line=j+1
+            return True
+
     for i in range(len(instructions)):
         typ=instruction_type(instructions[i])
         num=len(instructions[i])
@@ -367,15 +363,70 @@ def length_error(instructions):
             error_line=len(var_instructions)+i+1
             return True
 
-        elif(typ=='F'):
+        elif(typ=='F' and num!=1):
             error_line=len(var_instructions)+i+1
             return True
         return False
+def var_error(l):
+    global error_line
+    global state
+    flag=0
+    count_norm=0
+    count_var=0
+    for i in range(len(l)):
+        if(l[i]==''):
+            continue
+        if(flag==0):
+            temp=l[i].split()
+            if(temp[0][-1]==':'): # label
+                if(temp[1][0]=='v'):
+                    count_var+=1
+                else:
+                    flag=1
+                    count_norm+=1
+            else: # no label
+                if(temp[0][0]=='v'):
+                    count_var+=1
+                else:
+                    flag=1
+                    count_norm+=1
+        elif(flag==1):
+             temp=l[i].split()
+             if(temp[0][-1]==':'): # label
+                if(temp[1][0]!='v'):
+                    count_norm+=1
+                else:
+                    flag=2
+                    count_var+=1
+             else: # no label
+                if(temp[0][0]!='v'):
+                    count_norm+=1
+                else:
+                    flag=2
+                    count_var+=1
 
 
+        if(flag==2):
+            error_line=count_var+count_norm
+            state=1   # not all var on top
+            return True
+
+    buff=[]
+    for x in var_instructions:
+        buff.append(x[1])
+
+    for i in range(len(instructions)):
+        if(instruction_type(instructions[i])=='D'):
+            if(instructions[i][-1] not in buff):
+                error_line=len(var_instructions)+i+1
+                state=2
+                return True # undefined var
+
+    return False
 
 
 def error(instructions):
+
     if(label_error(instructions,var_instructions)):
         if(state==1 or state==3):
             sys.stderr.write("Label ERROR : Syntax Error at line  ")
@@ -401,7 +452,7 @@ def error(instructions):
         sys.stderr.write("Flag ERROR : Invalid syntax for FLAGS at line  ")
         sys.stdout.write(str(error_line))
         return True
-    if(length_error(instructions)):
+    if(length_error(instructions)):   
         sys.stderr.write("Invalid instruction ERROR : Invalid Syntax at line  ")
         sys.stdout.write(str(error_line))
         return True
@@ -416,13 +467,12 @@ def error(instructions):
             sys.stderr.write("Typo ERROR : Invalid Register syntax at line  ")
             sys.stdout.write(str(error_line))
         return True
-
     if(var_error(l)):
         if(state==1):
-            sys.stderr.write("ERROR : Invalid variable declaration at line  ")
+            sys.stderr.write("Variable ERROR : Invalid variable declaration at line  ")
             sys.stdout.write(str(error_line))
         else:
-            sys.stderr.write("ERROR : Undefined variable at line  ")
+            sys.stderr.write("Variable ERROR : Undefined variable at line  ")
             sys.stdout.write(str(error_line))
         return True
 
