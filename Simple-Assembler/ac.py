@@ -246,7 +246,7 @@ def var_error(l):
         if(l[i]==''):
             continue
         temp=l[i].split(' ')   # ['var', 'x']
-        # print("temp -> ",temp) # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        # print("temp -> ",temp) # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if(temp[0][-1]==':'):   # label: var x
             if(temp[1][0]!='v'):
                 break_index=i+1  # in case we'll start from this index to scan for var declarations
