@@ -71,8 +71,30 @@ def MEM(index):              # @PRERAK return list (element of memory)
 def RF(reg_name): #as string
     return list_to_decimal(register_values[reg_name])
 
+def overflow(val1,val2,operation):
+global pc
+global memory
+global register_values
+global register_code
+global opcode
+if(operation=="+"):
+    if(val1+val2>255):
+    return True
+else:
+    return False
+if(operation=="-"):
+    if(val1-val2<0):
+    return True
+else:
+    return False
+if(operation=="*"):
+    if(val1*val2>255):
+    return True
+else:
+    return False
 
-def EE():                     @ PRERAK  @ VINEET
+
+def EE():                    # @ PRERAK  @ VINEET
 	while True:
 		global pc
 		global memory
@@ -87,9 +109,157 @@ def EE():                     @ PRERAK  @ VINEET
 			pc=pc[8:]
 		if(verdict==-1):
 			break
+			
+			
+def jmp_instruction(current_instruction):     # @PRERAK  @ VINEET
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    mem_addr=s[8:] #string
+
+    pc=decimal_to_list(string_to_decimal(mem_addr))
+    pc=pc[8:]
+def jlt_instruction(current_instruction):     # @ PRERAK  @ VINEET
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    mem_addr=s[8:] #string
+    if(register_values["FLAGS"][-3]==1):
+        pc_=decimal_to_list(string_to_decimal(mem_addr))
+        pc_=pc_[8:]
+       
+       
+        pc=pc_
+    else:
+       
+       
+        pc=decimal_to_list(list_to_decimal(pc)+1)
+        pc=pc[8:]
+def jgt_instruction(current_instruction):     # @PRERAK  @ VINEET
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    mem_addr=s[8:] #string
+    if(register_values["FLAGS"][-2]==1):
+        pc_=decimal_to_list(string_to_decimal(mem_addr))
+        pc_=pc_[8:]
+       
+       
+        pc=pc_
+    else:
+       
+       
+        pc=decimal_to_list(list_to_decimal(pc)+1)
+        pc=pc[8:]
+def je_instruction(current_instruction):     # @PRERAK  @ VINEET
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    mem_addr=s[8:] #string
+    if(register_values["FLAGS"][-1]==1):
+        pc_=decimal_to_list(string_to_decimal(mem_addr))
+        pc_=pc_[8:]
+       
+       
+        pc=pc_
+    else:
+       
+       
+        pc=decimal_to_list(list_to_decimal(pc)+1)
+        pc=pc[8:]
 
 
-def execute(current_instruction):   @ ABINAV    @ PRERAK   @ VINEET  
+
+def add_instruction(current_instruction):     
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    reg1_code=s[7:10]
+    reg2_code=s[10:13]
+    reg3_code=s[13:]
+    val2=list_to_decimal( register_values[register_code[reg2_code]] )
+    val3=list_to_decimal( register_values[register_code[reg3_code]] )
+    res=val2+val3
+   
+    if(overflow(val2,val3,'+')):  
+        register_values["FLAGS"][-4]=1
+    register_values[register_code[reg1_code]]=decimal_to_list(res)
+   
+def sub_instruction(current_instruction):       
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    reg1_code=s[7:10]
+    reg2_code=s[10:13]
+    reg3_code=s[13:]
+    val2=list_to_decimal( register_values[register_code[reg2_code]] )
+    val3=list_to_decimal( register_values[register_code[reg3_code]] )
+    res=val2-val3
+   
+    if(overflow(val2,val3,'-')):
+        register_values["FLAGS"][-4]=1
+    if(res>=0):
+        register_values[register_code[reg1_code]]=decimal_to_list(res)
+    else:
+        register_values[register_code[reg1_code]]=decimal_to_list(0)
+   
+def mul_instruction(current_instruction):
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    reg1_code=s[7:10]
+    reg2_code=s[10:13]
+    reg3_code=s[13:]
+    val2=list_to_decimal( register_values[register_code[reg2_code]] )
+    val3=list_to_decimal( register_values[register_code[reg3_code]] )
+    res=val2*val3
+   
+    if(overflow(val2,val3,'*')):
+        register_values["FLAGS"][-4]=1
+    register_values[register_code[reg1_code]]=decimal_to_list(res)
+
+
+			
+			
+
+
+
+def execute(current_instruction):   # @ ABHINAV    @ PRERAK   @ VINEET  
 	global pc
 	global memory
 	global register_values
