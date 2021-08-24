@@ -48,7 +48,27 @@ def string_to_decimal(s):
     return res
 
 
-
+def overflow(val1,val2,operation):
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    if(operation=="+"):
+        if(val1+val2>255):
+            return True
+        else:
+            return False
+    if(operation=="-"):
+        if(val1-val2<0):
+            return True
+        else:
+            return False
+    if(operation=="*"):
+        if(val1*val2>255):
+            return True
+        else:
+            return False
 
 
 
