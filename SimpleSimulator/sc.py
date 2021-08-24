@@ -1,4 +1,4 @@
-opcode = { "00000":"add","00001":"sub","00110":"mul","01010":"xor","01011":"or","01100":"and",   # @VINEET
+opcode = { "00000":"add","00001":"sub","00110":"mul","01010":"xor","01011":"or","01100":"and",   # @ VINEET
            "00010":"movB","01000":"rs","01001":"ls",
            "00011":"movC","00111":"div","01101":"not","01110":"cmp",
            "00100":"ld","00101":"st",
@@ -71,3 +71,103 @@ def MEM(index):              # @PRERAK return list (element of memory)
 
 def RF(reg_name): #as string
     return list_to_decimal(register_values[reg_name])
+
+
+def EE():                     @ PRERAK  @ VINEET
+	while True:
+		global pc
+		global memory
+		global register_values
+		global register_code
+		global opcode
+		index=list_to_decimal(pc)
+		current_instruction=MEM(index) 
+		verdict=execute(current_instruction) 
+		if(verdict==1):
+			pc=decimal_to_list(list_to_decimal(pc)+1)
+			pc=pc[8:]
+		if(verdict==-1):
+			break
+
+
+def execute(current_instruction):   @ ABINAV    @ PRERAK   @ VINEET  
+	global pc
+	global memory
+	global register_values
+	global register_code
+	global opcode
+	opc=""
+	for i in range(5):
+		opc+=str(current_instruction[i])
+	current_instruction_name=opcode[opc]
+	if current_instruction_name=='add':
+		add_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='sub':
+		sub_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='mul':
+		mul_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='xor':
+		xor_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='or':
+		or_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='and':
+		and_instruction(current_instruction)
+		return 1
+
+	elif current_instruction_name=='movB':
+		movB_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='rs':
+		rs_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='ls':
+		ls_instruction(current_instruction)
+		return 1
+
+	elif current_instruction_name=='movC':
+		movC_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='div':
+		div_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='not':
+		not_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='cmp':
+		cmp_instruction(current_instruction)
+		return 1
+
+	elif current_instruction_name=='ld':
+		ld_instruction(current_instruction)
+		return 1
+	elif current_instruction_name=='st':
+		st_instruction(current_instruction)
+		return 1
+
+	elif current_instruction_name=='jmp':
+		jmp_instruction(current_instruction)
+		return 0
+	elif current_instruction_name=='jlt':
+		jlt_instruction(current_instruction)
+		return 0
+
+	elif current_instruction_name=='jgt':
+		jgt_instruction(current_instruction)
+		return 0
+
+	elif current_instruction_name=='je':
+		je_instruction(current_instruction)
+		return 0
+
+	elif current_instruction_name=='hlt':
+		return -1
+		
+
+
+EE()
+
