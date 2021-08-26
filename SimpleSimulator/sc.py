@@ -253,6 +253,21 @@ def mul_instruction(current_instruction):
         register_values["FLAGS"][-4]=1
     register_values[register_code[reg1_code]]=decimal_to_list(res)
 
+def not_instruction(current_instruction):                          # @ ABHINAV
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    reg1_code=s[10:13]
+    reg2_code=s[13:]
+    val2=list_to_decimal( register_values[register_code[reg2_code]] )
+    res=~val2
+    register_values[register_code[reg1_code]]=decimal_to_list(res)
+
 
 
 			
