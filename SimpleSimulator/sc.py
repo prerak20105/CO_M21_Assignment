@@ -348,11 +348,26 @@ def rs_instruction(current_instruction):                    # @ ABHINAV
     imm_value=string_to_decimal(imm)
     res=val1 >> imm_value
     register_values[register_code[reg1_code]]=decimal_to_list(res)
-
-
-
-
-			
+	
+def cmp_instruction(current_instruction):                          # @ ABHINAV
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    reg1_code=s[10:13]
+    reg2_code=s[13:]
+    val1=list_to_decimal( register_values[register_code[reg1_code]] )
+    val2=list_to_decimal( register_values[register_code[reg2_code]] )
+    if (val1<val2):
+        register_values["FLAGS"][-3]=1
+    else if (val1>val2):
+        register_values["FLAGS"][-2]=1
+    else if(val==val2):
+        register_values["FLAGS"][-1]=1			
 			
 
 def execute(current_instruction):   # @ ABHINAV    @ PRERAK   @ VINEET  
