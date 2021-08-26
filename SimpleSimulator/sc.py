@@ -299,6 +299,23 @@ def movC_instruction(current_instruction):                     # @ ABHINAV
     res=val2
     register_values[register_code[reg1_code]]=decimal_to_list(res)
 
+def div_instruction(current_instruction):                  # @ ABHINAV
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    reg1_code=s[10:13]
+    reg2_code=s[13:]
+    val1=list_to_decimal( register_values[register_code[reg1_code]] )
+    val2=list_to_decimal( register_values[register_code[reg2_code]] )
+    res1=val1/val2
+    res2=val%val2
+    register_values[register_code[reg1_code]]=decimal_to_list(res1)
+    register_values[register_code[reg1_code]]=decimal_to_list(res2)
 
 
 			
