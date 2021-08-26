@@ -317,6 +317,24 @@ def div_instruction(current_instruction):                  # @ ABHINAV
     register_values[register_code[reg1_code]]=decimal_to_list(res1)
     register_values[register_code[reg1_code]]=decimal_to_list(res2)
 
+def ls_instruction(current_instruction):                  # @ ABHINAV
+    global pc
+    global memory
+    global register_values
+    global register_code
+    global opcode
+    s=""
+    for x in current_instruction:
+        s+=str(x)
+    reg1_code=s[5:8]
+    imm=s[8:]
+    val1=list_to_decimal( register_values[register_code[reg1_code]] )
+    imm_value=string_to_decimal(imm)
+    res=val1 << imm_value
+    register_values[register_code[reg1_code]]=decimal_to_list(res)
+
+
+
 
 			
 			
