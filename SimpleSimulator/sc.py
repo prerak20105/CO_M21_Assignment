@@ -1,8 +1,11 @@
-import matplotlib.pyplot as plt
+
+
+import matplotlib.pyplot as plt                   # @ PRERAK
 cycles=[]
 memory_accesses=[]
 memory_accesses_index=0
 
+                                                  # @ VINEET
 
 opcode = { "00000":"add","00001":"sub","00110":"mul","01010":"xor","01011":"or","01100":"and",
            "00010":"movB","01000":"rs","01001":"ls",
@@ -11,10 +14,14 @@ opcode = { "00000":"add","00001":"sub","00110":"mul","01010":"xor","01011":"or",
            "01111":"jmp","10000":"jlt","10001":"jgt","10010":"je",
            "10011":"hlt"}   
 
+                                                  # @ VINEET
+
 register_code = {"000":"R0","001":"R1","010":"R2","011":"R3","100":"R4","101":"R5","110":"R6","111":"FLAGS"}
 
+                                                  # @ PRERAK
+
 register_values = {
-    "R0"    : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    "R0"    : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],  
     "R1"    : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     "R2"    : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     "R3"    : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -23,9 +30,9 @@ register_values = {
     "R6"    : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     "FLAGS" : [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 }
-#  @ VINEET                             V  L  G  E  
+#  @ VINEET                            V L G E  
 
-def list_to_decimal(l): #[0,0,...]
+def list_to_decimal(l):                    # @ PRERAK  
     global pc
     global memory
     global register_values
@@ -36,7 +43,7 @@ def list_to_decimal(l): #[0,0,...]
         res+=l[j]*pow(2,i)
         i+=1
     return res
-def decimal_to_list(val):
+def decimal_to_list(val):                  # @ PRERAK
     global pc
     global memory
     global register_values
@@ -54,7 +61,7 @@ def decimal_to_list(val):
         for x in s1:
             res.append(int(x))
     return res
-def string_to_decimal(s):
+def string_to_decimal(s):                  # @ PRERAK
     global pc
     global memory
     global register_values
@@ -66,7 +73,7 @@ def string_to_decimal(s):
         i+=1
     return res
 
-def overflow(val1,val2,operation):
+def overflow(val1,val2,operation):         # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -87,7 +94,7 @@ def overflow(val1,val2,operation):
             return True
         else:
             return False
-def compare(reg1_code,reg2_code):#as strings
+def compare(reg1_code,reg2_code):          # @ PRERAK 
     global pc
     global memory
     global register_values
@@ -105,7 +112,7 @@ def compare(reg1_code,reg2_code):#as strings
 ######################################################################
 
 import sys
-memory=list(sys.stdin.read().split('\n'))
+memory=list(sys.stdin.read().split('\n'))   # @ PRERAK
 memory.pop(-1)
 for i in range(len(memory)):
     temp=[]
@@ -115,16 +122,15 @@ for i in range(len(memory)):
 for i in range(256-len(memory)):
     memory.append([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
 
-###  memory created  -> memory
 pc = [0,0,0,0,0,0,0,0]
 
-def MEM(index):     # return list (element of memory)
+def MEM(index):                             # @ PRERAK
     return memory[index]
 
-def RF(reg_name): #as string
+def RF(reg_name):                           # @ PRERAK
     return list_to_decimal(register_values[reg_name])
 
-def print_pc_and_registers():
+def print_pc_and_registers():               # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -139,7 +145,7 @@ def print_pc_and_registers():
             ans+=str(x[j])
         ans+=" "
     sys.stdout.write(ans+'\n')
-def print_memory_dump():
+def print_memory_dump():                    # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -150,7 +156,7 @@ def print_memory_dump():
         for i in range(len(x)):
             ans+=str(x[i])
         sys.stdout.write(ans+'\n')
-def reset_flags():
+def reset_flags():                          # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -162,7 +168,7 @@ def reset_flags():
     register_values["FLAGS"][-3]=0
     register_values["FLAGS"][-4]=0
 
-def plot_memory_accesses():
+def plot_memory_accesses():                 # @ PRERAK
     global cycles
     global memory_accesses
     plt.plot(cycles,memory_accesses,color='b',marker='o',linestyle='-',linewidth='1',markersize=6)
@@ -171,7 +177,7 @@ def plot_memory_accesses():
     plt.ylabel("Address",fontsize=15)
     plt.show()
 
-def EE():
+def EE():                                   # @ PRERAK @ VINEET
     while True:
         global pc
         global memory
@@ -196,7 +202,7 @@ def EE():
         
 
 
-def add_instruction(current_instruction):
+def add_instruction(current_instruction):  # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -216,7 +222,7 @@ def add_instruction(current_instruction):
         register_values["FLAGS"][-4]=1
     register_values[register_code[reg1_code]]=decimal_to_list(res)
     print_pc_and_registers()
-def sub_instruction(current_instruction):
+def sub_instruction(current_instruction):  # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -239,7 +245,7 @@ def sub_instruction(current_instruction):
     else:
         register_values[register_code[reg1_code]]=decimal_to_list(0)
     print_pc_and_registers()
-def mul_instruction(current_instruction):
+def mul_instruction(current_instruction):  # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -259,7 +265,7 @@ def mul_instruction(current_instruction):
         register_values["FLAGS"][-4]=1
     register_values[register_code[reg1_code]]=decimal_to_list(res)
     print_pc_and_registers()
-def xor_instruction(current_instruction):
+def xor_instruction(current_instruction):  # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -277,7 +283,7 @@ def xor_instruction(current_instruction):
     register_values[register_code[reg1_code]]=decimal_to_list(res)
     reset_flags()
     print_pc_and_registers()
-def or_instruction(current_instruction):
+def or_instruction(current_instruction):   # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -295,7 +301,7 @@ def or_instruction(current_instruction):
     register_values[register_code[reg1_code]]=decimal_to_list(res)
     reset_flags()
     print_pc_and_registers()
-def and_instruction(current_instruction):
+def and_instruction(current_instruction):  # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -314,7 +320,9 @@ def and_instruction(current_instruction):
     reset_flags()
     print_pc_and_registers()
 
-def movB_instruction(current_instruction):
+
+
+def movB_instruction(current_instruction): # @ ABHINAV 
     global pc
     global memory
     global register_values
@@ -331,7 +339,7 @@ def movB_instruction(current_instruction):
     register_values[register_code[reg1_code]]=imm
     reset_flags()
     print_pc_and_registers()
-def ls_instruction(current_instruction):
+def ls_instruction(current_instruction):   # @ ABHINAV
     global pc
     global memory
     global register_values
@@ -350,7 +358,7 @@ def ls_instruction(current_instruction):
     register_values[register_code[reg1_code]]=decimal_to_list(val)
     reset_flags()
     print_pc_and_registers()
-def rs_instruction(current_instruction):
+def rs_instruction(current_instruction):   # @ ABHINAV
     global pc
     global memory
     global register_values
@@ -369,8 +377,7 @@ def rs_instruction(current_instruction):
     register_values[register_code[reg1_code]]=decimal_to_list(val)
     reset_flags()
     print_pc_and_registers()
-
-def movC_instruction(current_instruction):
+def movC_instruction(current_instruction): # @ ABHINAV
     global pc
     global memory
     global register_values
@@ -384,9 +391,7 @@ def movC_instruction(current_instruction):
     register_values[register_code[reg1_code]]=register_values[register_code[reg2_code]].copy()
     reset_flags()
     print_pc_and_registers()
-
-
-def div_instruction(current_instruction):
+def div_instruction(current_instruction):  # @ ABHINAV
     global pc
     global memory
     global register_values
@@ -401,7 +406,7 @@ def div_instruction(current_instruction):
     register_values["R1"]=decimal_to_list( list_to_decimal(register_values[register_code[reg1_code]]) % list_to_decimal(register_values[register_code[reg2_code]]) )
     reset_flags()
     print_pc_and_registers()
-def cmp_instruction(current_instruction):
+def cmp_instruction(current_instruction):  # @ ABHINAV
     global pc
     global memory
     global register_values
@@ -421,7 +426,10 @@ def cmp_instruction(current_instruction):
     else:
         register_values["FLAGS"][-2]=1
     print_pc_and_registers()
-def not_instruction(current_instruction):
+
+
+
+def not_instruction(current_instruction):  # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -438,8 +446,7 @@ def not_instruction(current_instruction):
     register_values[register_code[reg1_code]]=val
     reset_flags()
     print_pc_and_registers()
-
-def ld_instruction(current_instruction):  # confused interpretation
+def ld_instruction(current_instruction):   # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -454,7 +461,7 @@ def ld_instruction(current_instruction):  # confused interpretation
     register_values[register_code[reg1_code]]=data
     reset_flags()
     print_pc_and_registers()
-def st_instruction(current_instruction):
+def st_instruction(current_instruction):   # @ PRERAK @ VINEET
     global pc
     global memory
     global register_values
@@ -468,8 +475,7 @@ def st_instruction(current_instruction):
     memory[index]=register_values[register_code[reg1_code]]
     reset_flags()
     print_pc_and_registers()
-
-def jmp_instruction(current_instruction):
+def jmp_instruction(current_instruction):  # @ PRERAK @ VINEET
     global cycles
     global memory_accesses
     global memory_accesses_index
@@ -489,7 +495,7 @@ def jmp_instruction(current_instruction):
     memory_accesses.append(list_to_decimal(pc))
     pc=decimal_to_list(string_to_decimal(mem_addr))
     pc=pc[8:]
-def jlt_instruction(current_instruction):
+def jlt_instruction(current_instruction):  # @ PRERAK @ VINEET
     global cycles
     global memory_accesses
     global memory_accesses_index
@@ -519,7 +525,7 @@ def jlt_instruction(current_instruction):
         memory_accesses.append(list_to_decimal(pc))
         pc=decimal_to_list(list_to_decimal(pc)+1)
         pc=pc[8:]
-def jgt_instruction(current_instruction):
+def jgt_instruction(current_instruction):  # @ PRERAK @ VINEET
     global cycles
     global memory_accesses
     global memory_accesses_index
@@ -549,7 +555,7 @@ def jgt_instruction(current_instruction):
         memory_accesses.append(list_to_decimal(pc))
         pc=decimal_to_list(list_to_decimal(pc)+1)
         pc=pc[8:]
-def je_instruction(current_instruction):
+def je_instruction(current_instruction):   # @ PRERAK @ VINEET
     global cycles
     global memory_accesses
     global memory_accesses_index
@@ -578,7 +584,7 @@ def je_instruction(current_instruction):
         pc=pc[8:]
 
 
-def execute(current_instruction):
+def execute(current_instruction):          # @ PRERAK @ VINEET
     global cycles
     global memory_accesses
     global memory_accesses_index
@@ -663,9 +669,10 @@ def execute(current_instruction):
         return -1
         
 
-# print_pc_and_registers()
-EE()
-print_memory_dump()
-plot_memory_accesses() 
+
+EE()                                       # @ PRERAK @ VINEET
+print_memory_dump()                        # @ PRERAK @ VINEET
+
+plot_memory_accesses()                     # @ PRERAK
 
 
