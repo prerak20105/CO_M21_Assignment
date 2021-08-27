@@ -313,9 +313,9 @@ def div_instruction(current_instruction):                  # @ ABHINAV
     val1=list_to_decimal( register_values[register_code[reg1_code]] )
     val2=list_to_decimal( register_values[register_code[reg2_code]] )
     res1=val1/val2
-    res2=val%val2
-    register_values[register_code[reg1_code]]=decimal_to_list(res1)
-    register_values[register_code[reg1_code]]=decimal_to_list(res2)
+    res2=val1%val2
+    register_values[register_code["000"]]=decimal_to_list(res1)
+    register_values[register_code["001"]]=decimal_to_list(res2)
 
 def ls_instruction(current_instruction):                  # @ ABHINAV
     global pc
