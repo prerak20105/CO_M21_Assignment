@@ -1,4 +1,4 @@
- 
+
 
 import matplotlib.pyplot as plt                   # @ PRERAK
 cycles=[]
@@ -32,7 +32,7 @@ register_values = {
 }
 #  @ VINEET                            V L G E  
 
-def list_to_decimal(l):                    # @ PRERAK 
+def list_to_decimal(l):                    # @ PRERAK  
     global pc
     global memory
     global register_values
